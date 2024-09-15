@@ -117,7 +117,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         push: true
-        context: ./src
+        context: .
         tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DockerImageName }}:${{ github.sha }}
 
   helm-ci:
@@ -147,7 +147,7 @@ jobs:
     - name: Upload Helm Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: helm-packagehelm-artifacts-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
+        name: helm-package-artifacts-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
         path: ./*.tgz
 
   # deploy-helm:
