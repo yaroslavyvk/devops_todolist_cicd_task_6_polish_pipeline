@@ -12,11 +12,14 @@ on:
       deploy-os:
         description: 'OS to deploy (ubuntu-latest or windows-latest)'
         required: true
-        default: 'ubuntu-latest'
+        type: choice
+        options: [ubuntu-latest, windows-latest]
+
       deploy-python-version:
         description: 'Python version to deploy (3.8 or 3.9)'
         required: true
-        default: '3.8'
+        type: choice
+        options: [3.8, 3.9]
 
 env:
   DockerImageName: todoapp
@@ -31,6 +34,8 @@ jobs:
       matrix:
         os: [ubuntu-latest, windows-latest]
         python_version: [3.8, 3.9]
+
+
     runs-on: ${{ matrix.os }}
 
     defaults:
@@ -99,7 +104,7 @@ jobs:
     - uses: actions/download-artifact@v4
       name: Download python artifacts
       with:
-        name: python-artifacts-${{ matrix.os }}-${{ matrix.python_version }}
+        name: python-artifacts-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
         path: .
 
     - name: Login to Docker Hub
