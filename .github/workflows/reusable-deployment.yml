@@ -26,17 +26,17 @@ jobs:
       steps:
       - uses: actions/download-artifact@v4
         with:
-          name: helm-package
+          name: helm-package-artifacts-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
           path: .
 
       - uses: actions/download-artifact@v4
         with:
-          name: helm-artifacts
+          name: helm-artifacts-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
           path: .
 
       - uses: actions/download-artifact@v4
         with:
-          name: kind-cluster
+          name: kind-cluster-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
           path: .
 
       - name: Set Up Helm
