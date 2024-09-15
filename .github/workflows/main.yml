@@ -7,25 +7,44 @@ on:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+  workflow_dispatch:
+    inputs:
+      deploy-os:
+        description: 'OS to deploy (ubuntu-latest or windows-latest)'
+        required: true
+        default: 'ubuntu-latest'
+      deploy-version:
+        description: 'Python version to deploy (3.8 or 3.9)'
+        required: true
+        default: '3.8'
 
 env:
-  PythonVersion: 3.8
   DockerImageName: todoapp
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   python-ci:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python_version: [3.8, 3.9]
+    runs-on: ${{ matrix.os }}
+
     defaults:
       run:
         working-directory: ./src
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python ${{ env.PythonVersion }}
+      - name: Set up Python ${{ matrix.python_version }}
         uses: actions/setup-python@v4
         with:
-          python-version: ${{ env.PythonVersion }}
+          python-version:  ${{ matrix.python_version }}
 
       - name: Install dependencies
         run: |
@@ -126,11 +145,11 @@ jobs:
         name: helm-package
         path: ./*.tgz
 
-  deploy-helm:
-    name: Deploy helm
-    uses: ./.github/workflows/reusable-deployment.yml
-    needs: [helm-ci, docker-ci]
-    secrets: inherit
-    with:
-      environment: development
-      version: ${{ github.sha }}
+  # deploy-helm:
+  #   name: Deploy helm
+  #   uses: ./.github/workflows/reusable-deployment.yml
+  #   needs: [helm-ci, docker-ci]
+  #   secrets: inherit
+  #   with:
+  #     environment: development
+  #     version: {{ github.sha }}
