@@ -13,7 +13,7 @@ on:
         description: 'OS to deploy (ubuntu-latest or windows-latest)'
         required: true
         default: 'ubuntu-latest'
-      deploy-version:
+      deploy-python-version:
         description: 'Python version to deploy (3.8 or 3.9)'
         required: true
         default: '3.8'
@@ -72,21 +72,21 @@ jobs:
       - name: Upload python artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: python-artifacts
-          path: .
+          name: python-artifacts-${{ matrix.os }}-${{ matrix.python_version }}
+          path: ./src
 
       - name: Upload helm artifacts
         if: github.ref_name == 'main'
         uses: actions/upload-artifact@v4
         with:
-          name: helm-artifacts
+          name: helm-artifacts-${{ matrix.os }}-${{ matrix.python_version }}
           path: ${{ github.workspace }}/helm-charts
 
       - name: Upload kind cluster artifact
         if: github.ref_name == 'main'
         uses: actions/upload-artifact@v4
         with:
-          name: kind-cluster
+          name: kind-cluster-${{ matrix.os }}-${{ matrix.python_version }}
           path: ${{ github.workspace }}/cluster.yml
 
   docker-ci:
@@ -99,7 +99,7 @@ jobs:
     - uses: actions/download-artifact@v4
       name: Download python artifacts
       with:
-        name: python-artifacts
+        name: python-artifacts-${{ matrix.os }}-${{ matrix.python_version }}
         path: .
 
     - name: Login to Docker Hub
@@ -113,7 +113,7 @@ jobs:
       with:
         push: true
         context: ./src
-        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DockerImageName }}:${{ github.sha }}
+        tags: ${{ secrets.DOCKERHUB_USERNAME }}/${{ env.DockerImageName }}:${{ github.event.inputs.deploy-os }}/${{ github.event.inputs.deploy-python-version }}/${{ github.sha }}
 
   helm-ci:
     runs-on: ubuntu-latest
@@ -124,7 +124,7 @@ jobs:
 
     - uses: actions/download-artifact@v4
       with:
-        name: helm-artifacts
+        name: helm-artifacts-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
         path: .
 
     - name: Set Up Helm
@@ -142,7 +142,7 @@ jobs:
     - name: Upload Helm Artifact
       uses: actions/upload-artifact@v4
       with:
-        name: helm-package
+        name: helm-packagehelm-artifacts-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
         path: ./*.tgz
 
   # deploy-helm:
