@@ -156,5 +156,5 @@ jobs:
     needs: [helm-ci, docker-ci]
     secrets: inherit
     with:
-      environment: development
+      environment: staging
       version: ${{ github.sha }}
