@@ -150,7 +150,16 @@ jobs:
         name: helm-package-artifacts-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
         path: ./*.tgz
 
-  deploy-helm:
+  deploy-helm-dev:
+    name: Deploy helm to Development
+    uses: ./.github/workflows/reusable-deployment.yml
+    needs: [helm-ci, docker-ci]
+    secrets: inherit
+    with:
+      environment: development
+      version: ${{ github.sha }}
+
+  deploy-helm-stage:
     name: Deploy helm
     uses: ./.github/workflows/reusable-deployment.yml
     needs: [helm-ci, docker-ci]
