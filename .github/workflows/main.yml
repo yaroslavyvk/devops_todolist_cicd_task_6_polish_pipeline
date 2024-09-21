@@ -150,11 +150,22 @@ jobs:
         name: helm-package-artifacts-${{ github.event.inputs.deploy-os }}-${{ github.event.inputs.deploy-python-version }}
         path: ./*.tgz
 
-  deploy-helm:
-    name: Deploy helm
+  deploy-helm-dev:
+    name: Deploy helm to Development
     uses: ./.github/workflows/reusable-deployment.yml
     needs: [helm-ci, docker-ci]
     secrets: inherit
     with:
+      environment: development
+      version: ${{ github.sha }}
+
+  deploy-helm-stg:
+    name: Deploy helm to Staging
+    uses: ./.github/workflows/reusable-deployment.yml
+    needs: [deploy-helm-dev]
+    secrets: inherit
+    with:
       environment: staging
       version: ${{ github.sha }}
+      helm-values-path: ./todoapp/values/stg.yaml
+      helm-release-name: todoapp-staging
